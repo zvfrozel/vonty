@@ -117,12 +117,14 @@ class Tag(models.Model):
         exclude = exclude or []
 
         if "parent" not in exclude:
-            if self.parent
+            if self.parent:
+                pass
 
     # Tree structure implementation
 
     def _check_ascendant(self, tag, recursion_begin):
         # Avoid infinite recursion is tag is an ascendant of itself
+        pass
 
     def check_ascendant(self, tag):
         """
