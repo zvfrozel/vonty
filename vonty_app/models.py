@@ -4,10 +4,11 @@ Vonty models:
 2. Tag
 """
 
-from django.db import models
-from django.db.models import Q
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, StepValueValidator
 from django.contrib.auth import get_user_model
+from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 
@@ -111,24 +112,48 @@ class Tag(models.Model):
     def __str__(self):
         return self.name.replace("-", " ").replace("_", " ").title()
 
-    def check_ancestor(self, tag):
+    def clean_fields(self, exclude=None):
+        super().clean_fields(exclude=exclude)
+        exclude = exclude or []
+
+        if "parent" not in exclude:
+            if self.parent
+
+    # Tree structure implementation
+
+    def _check_ascendant(self, tag, recursion_begin):
+        # Avoid infinite recursion is tag is an ascendant of itself
+
+    def check_ascendant(self, tag):
         """
-        Check whether ``tag'' is an ancestor of ``self''.
-        A tag is an ancestor of itself.
+        Check whether ``tag'' is an ascendant of ``self''.
+        A tag is counted as an ascendant of itself.
         """
         if tag == self:
             return True
-        if self.parent is None:
-            return False
-        else:
-            return self.parent.check_ancestor(tag)
+        return self.check_proper_ascendant(tag)
+
+    def check_proper_ascendant(self, tag):
+        """
+        Check whether ``tag'' is a proper ascendant of ``self''.
+        A tag is not counted as a proper ascendant of itself.
+        """
+        return self.parent \
+            and self.parent._check_ascendant(tag, recursion_begin=self)
 
     def check_descendant(self, tag):
         """
         Check whether ``tag'' is a descendant of ``self''.
-        A tag is a descendant of itself.
+        A tag is counted as a descendant of itself.
         """
-        return tag.check_ancestor(self)
+        return tag.check_ascendant(self)
+
+    def check_proper_descendant(self, tag):
+        """
+        Check whether ``tag'' is a proper descendant of ``self''.
+        A tag is not counted as a descendant of itself.
+        """
+        return tag.check_proper_ascendant(self)
 
     class Meta:
         constraints = [
