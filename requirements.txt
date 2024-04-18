@@ -1,3 +1,5 @@
 # This is a comment
 django >= 5.0.0
 django-treebeard >= 4.7.0
+
+# TODO: Update this into a pyproject.toml file and use a tool like Poetry
