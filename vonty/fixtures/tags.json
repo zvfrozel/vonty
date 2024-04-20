@@ -1,0 +1,25 @@
+[
+  {
+    "data": {
+      "name": "algebra",
+      "desc": "",
+      "use_filter": true
+    }
+  },
+  {
+    "data": {
+      "name": "geometry",
+      "desc": "",
+      "use_filter": true
+    },
+    "children": [
+      {
+        "data": {
+          "name": "angle-chase",
+          "desc": "",
+          "use_filter": true
+        }
+      }
+    ]
+  }
+]

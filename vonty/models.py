@@ -4,11 +4,7 @@ Vonty models:
 2. Tag
 """
 
-from django.core.validators import (
-    RegexValidator,
-    MaxValueValidator,
-    StepValueValidator,
-)
+from django.core.validators import MaxValueValidator, StepValueValidator
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
@@ -97,7 +93,7 @@ class Problem(models.Model):
 class Tag(MP_Node):
     name = models.SlugField(
         unique=True,
-        help_text=_("Identifier slug. e.g. angle-chase")
+        help_text=_("Unique dentifier slug. e.g. angle-chase")
     )
     desc = models.TextField(
         max_length=200,
