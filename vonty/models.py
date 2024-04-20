@@ -112,7 +112,7 @@ class Tag(MP_Node):
         )
     )
 
-    #  Tree structure implementation
+    #  Tree structure implementation using MP_Node from django-treebeard
     node_order_by = ["name",]
 
     def __str__(self):
