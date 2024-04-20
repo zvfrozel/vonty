@@ -4,12 +4,17 @@ Vonty models:
 2. Tag
 """
 
-from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, StepValueValidator
+from django.core.validators import (
+    RegexValidator,
+    MaxValueValidator,
+    StepValueValidator,
+)
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+
+from treebeard.mp_tree import MP_Node
 
 
 class Problem(models.Model):
@@ -39,9 +44,16 @@ class Problem(models.Model):
             "A link to the problem on AOPS, if it exists. "
         )
     )
+    problem_number = models.PositiveIntegerField(
+        null=True, blank=True, help_text=_(
+            "Problem number of this problem "
+            "in the contest/problem-set that it appeared in. "
+            "Leave this blank for standalone problems, "
+            "but it's always useful to keep a number for ordering problems."
+        )
+    )
     hardness = models.PositiveIntegerField(
-        null=True, blank=True,
-        help_text=_(
+        null=True, blank=True, help_text=_(
             "Hardness of the problem according to the MOHS scale. "
             "The rating can range from 0 to 60, "
             "and can be left blank if the problem is considered not-rateable. "
@@ -82,12 +94,15 @@ class Problem(models.Model):
         return self.desc
 
 
-class Tag(models.Model):
+class Tag(MP_Node):
     name = models.SlugField(
+        unique=True,
         help_text=_("Identifier slug. e.g. angle-chase")
     )
     desc = models.TextField(
-        max_length=200, help_text=_("Optional longer description.")
+        max_length=200,
+        blank=True,
+        help_text=_("Optional longer description.")
     )
     use_filter = models.BooleanField(
         default=True, help_text=_(
@@ -96,75 +111,9 @@ class Tag(models.Model):
             "used as umbrella parent tags and not as filters."
         )
     )
-    parent = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT, # TODO: Change PROTECT to SET grandparent
-        related_name="children",
-        help_text=_(
-            "The parent tag that this tag comes under. "
-            "Filtering by the parent tag filters by this tag too. "
-            "If this field is blank, the use filter option must be unchecked."
-        )
-    )
+
+    #  Tree structure implementation
+    node_order_by = ["name",]
 
     def __str__(self):
         return self.name.replace("-", " ").replace("_", " ").title()
-
-    def clean_fields(self, exclude=None):
-        super().clean_fields(exclude=exclude)
-        exclude = exclude or []
-
-        if "parent" not in exclude:
-            if self.parent:
-                pass
-
-    # Tree structure implementation
-
-    def _check_ascendant(self, tag, recursion_begin):
-        # Avoid infinite recursion is tag is an ascendant of itself
-        pass
-
-    def check_ascendant(self, tag):
-        """
-        Check whether ``tag'' is an ascendant of ``self''.
-        A tag is counted as an ascendant of itself.
-        """
-        if tag == self:
-            return True
-        return self.check_proper_ascendant(tag)
-
-    def check_proper_ascendant(self, tag):
-        """
-        Check whether ``tag'' is a proper ascendant of ``self''.
-        A tag is not counted as a proper ascendant of itself.
-        """
-        return self.parent \
-            and self.parent._check_ascendant(tag, recursion_begin=self)
-
-    def check_descendant(self, tag):
-        """
-        Check whether ``tag'' is a descendant of ``self''.
-        A tag is counted as a descendant of itself.
-        """
-        return tag.check_ascendant(self)
-
-    def check_proper_descendant(self, tag):
-        """
-        Check whether ``tag'' is a proper descendant of ``self''.
-        A tag is not counted as a descendant of itself.
-        """
-        return tag.check_proper_ascendant(self)
-
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=Q(use_filter=False) | Q(parent__isnull=False),
-                name="filter_implies_parent",
-                violation_error_message=_(
-                    "Tag meant to be used as a filter "
-                    "must have a parent tag."
-                )
-            ),
-        ]

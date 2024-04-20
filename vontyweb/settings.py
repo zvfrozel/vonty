@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'vonty.apps.VontyConfig',
+    'treebeard',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
