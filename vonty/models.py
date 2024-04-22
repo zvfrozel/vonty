@@ -113,3 +113,23 @@ class Tag(MP_Node):
 
     def __str__(self):
         return self.name.replace("-", " ").replace("_", " ").title()
+
+    def add_children(self, children, use_filter=True):
+        """
+        Quick and dirty way to add children to the tag in bulk.
+
+        Children can be a list of tag names,
+        or a space/comma/newline separated string of tag names.
+
+        Each child is made with a blank description
+        and use_filter is set to the value of the use_filter flag.
+        """
+        if isinstance(children, str):
+            children = (
+                children
+                .replace(",", " ")
+                .replace("\n", " ")
+                .split()
+            )
+        for name in filter(None, children):
+            self.add_child(name=name, use_filter=use_filter)
