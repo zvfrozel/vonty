@@ -18,20 +18,22 @@ class TagForm(movenodeform_factory(Tag)):
             "in the form of space/comma/newline separated names. "
             "The children will be added with blank descriptions."
         ),
-        widget=forms.Textarea
+        widget=forms.Textarea,
     )
     children_use_filter = forms.BooleanField(
         required=False, initial=True, help_text=_(
             "Whether the children should be used as filters or not."
-        )
+        ),
     )
 
     def save(self, **kwargs):
         super().save(**kwargs)
+
         # Create children and save the children too
         names = self.cleaned_data["children_names"]
         use_filter = self.cleaned_data["children_use_filter"]
         self.instance.add_children(names, use_filter)
+
         return self.instance
 
 
