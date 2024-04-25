@@ -6,8 +6,7 @@ Vonty models:
 
 from django.core.validators import MaxValueValidator, StepValueValidator
 from django.contrib.auth import get_user_model
-from django.db import models
-from django.db.models import Q
+from django.db import models, IntegrityError
 from django.utils.translation import gettext_lazy as _
 
 from treebeard.mp_tree import MP_Node
@@ -82,6 +81,7 @@ class Problem(models.Model):
     )
     tags = models.ManyToManyField(
         "Tag",
+        blank=True,
         related_name="problem_set",
         help_text=_("The list of tags associated with the problem."),
     )
@@ -116,20 +116,9 @@ class Tag(MP_Node):
 
     def add_children(self, children, use_filter=True):
         """
-        Quick and dirty way to add children to the tag in bulk.
-
-        Children can be a list of tag names,
-        or a space/comma/newline separated string of tag names.
-
+        Add a list of children to the tag in bulk.
         Each child is made with a blank description
         and use_filter is set to the value of the use_filter flag.
         """
-        if isinstance(children, str):
-            children = (
-                children
-                .replace(",", " ")
-                .replace("\n", " ")
-                .split()
-            )
-        for name in filter(None, children):
+        for name in children:
             self.add_child(name=name, use_filter=use_filter)

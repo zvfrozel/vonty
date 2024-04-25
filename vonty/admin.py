@@ -2,6 +2,8 @@
 
 from django import forms
 from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.utils.translation import gettext_lazy as _
 
 from treebeard.admin import TreeAdmin
@@ -25,6 +27,32 @@ class TagForm(movenodeform_factory(Tag)):
             "Whether the children should be used as filters or not."
         ),
     )
+
+    def clean_children_names(self):
+        children_names = (
+            self.cleaned_data["children_names"]
+            .replace(",", " ")
+            .replace("\n", " ")
+            .split()
+        )
+        cleaned_children_names = []
+        queryset = self.Meta.model.objects
+
+        for name in children_names:
+            if queryset.filter(name=name).exists():
+                raise ValidationError(
+                    _("A tag named %(name)s already exists"),
+                    params = {"name": name},
+                )
+            if name in cleaned_children_names:
+                raise ValidationError(
+                    _("Found 2 children with the same name: %(name)s"),
+                    params = {"name": name},
+                )
+            cleaned_children_names.append(name)
+
+        return cleaned_children_names
+
 
     def save(self, **kwargs):
         super().save(**kwargs)
