@@ -6,10 +6,8 @@ Vonty models:
 
 from django.core.validators import MaxValueValidator, StepValueValidator
 from django.contrib.auth import get_user_model
-from django.db import models, IntegrityError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-from treebeard.mp_tree import MP_Node
 
 
 class Problem(models.Model):
@@ -90,7 +88,7 @@ class Problem(models.Model):
         return self.desc
 
 
-class Tag(MP_Node):
+class Tag(models.Model):
     name = models.SlugField(
         unique=True,
         help_text=_("Unique dentifier slug. e.g. angle-chase"),
@@ -107,9 +105,6 @@ class Tag(MP_Node):
             "used as umbrella parent tags and not as filters."
         ),
     )
-
-    #  Tree structure implementation using MP_Node from django-treebeard
-    node_order_by = ["name",]
 
     def __str__(self):
         return self.name.replace("-", " ").replace("_", " ").title()

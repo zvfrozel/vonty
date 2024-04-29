@@ -12,6 +12,10 @@ from treebeard.forms import movenodeform_factory
 from .models import Problem, Tag
 
 
+class ProblemAdmin(admin.ModelAdmin):
+    save_on_top = True
+
+
 class TagForm(movenodeform_factory(Tag)):
     children_names = forms.CharField(
         required=False,
@@ -88,5 +92,5 @@ class TagAdmin(TreeAdmin):
         )
 
 
-admin.site.register(Problem)
+admin.site.register(Problem, ProblemAdmin)
 admin.site.register(Tag, TagAdmin)

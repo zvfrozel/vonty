@@ -25,6 +25,8 @@ if (DEBUG == False):
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_interface',
+    'colorfield',
     'treebeard',
     # --------
     'django.contrib.admin',
@@ -36,6 +38,8 @@ INSTALLED_APPS = [
     # --------
     'vonty',
 ]
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
